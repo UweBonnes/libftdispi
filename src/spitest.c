@@ -29,6 +29,7 @@ int main(int argc, char **argv)
     struct ftdispi_context fsc;
     int vid = 0x0403;
     int pid = 0x6011;
+    uint8_t buf[256];
 
     int i;
 
@@ -62,12 +63,12 @@ int main(int argc, char **argv)
     }
     ftdispi_open(&fsc, &fc, INTERFACE_ANY);
     ftdispi_setmode(&fsc, 1, 0, 0, 0, 0, FTDISPI_GPO0);
-    ftdispi_setclock(&fsc, 200000);
+    ftdispi_setclock(&fsc, 1000000);
     puts("Hit ^C to abort");
     signal(SIGINT, sigintHandler);
 //    ftdispi_setloopback(&fsc, 0);
     do {
-        ftdispi_write(&fsc, "Test", 4, 0);
+        ftdispi_write_read(&fsc, "Test", 4, buf, 1, 0);
     }while  (!exitRequested);
     signal(SIGINT, SIG_DFL);
     puts("Done");
