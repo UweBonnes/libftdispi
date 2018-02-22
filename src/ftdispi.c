@@ -255,7 +255,7 @@ __dll int ftdispi_write_read(struct ftdispi_context * fsc,
     ASSERT_CHECK(!fsc, "CTX NOT INITIALIZED", FTDISPI_ERROR_CTX);
     ASSERT_CHECK(!((wbuf && wcount) || (rbuf && rcount)),
                  "NO CMD", FTDISPI_ERROR_CMD);
-    n = wcount + (rcount ? 9 : 6);
+    n = wcount + (rcount ? 10 : 6);
     ASSERT_CHECK(ftdispi_realloc(fsc, n), "REALLOC", FTDISPI_ERROR_MEM);
 
     i = 0;
@@ -277,22 +277,23 @@ __dll int ftdispi_write_read(struct ftdispi_context * fsc,
         fsc->mem[i++] = fsc->rd_cmd;
         fsc->mem[i++] = (rcount - 1) & 0xFF;
         fsc->mem[i++] = ((rcount - 1) >> 8) & 0xFF;
-        FTDI_CHECK(ftdi_write_data(&fsc->fc, fsc->mem, i), "[WR]RD", fsc->fc);
+        fsc->mem[i++] = SEND_IMMEDIATE;
+    }
+    fsc->mem[i++] = SET_BITS_LOW;
+    fsc->mem[i++] = fsc->bitini;
+    fsc->mem[i++] = BIT_DIR;
+    FTDI_CHECK(ftdi_write_data(&fsc->fc, fsc->mem, i), "[WR]RD", fsc->fc);
+    if (rcount && rbuf)
+    {
         for (n = 0; n < rcount; )
         {
             FTDI_CHECK(r = ftdi_read_data(&fsc->fc, rbuf + n, rcount - n), "RD", fsc->fc);
             n += r;
         }
-        i = 0;
     }
-    fsc->mem[i++] = SET_BITS_LOW;
-    fsc->mem[i++] = fsc->bitini;
-    fsc->mem[i++] = BIT_DIR;
-    FTDI_CHECK(ftdi_write_data(&fsc->fc, fsc->mem, i), "WR", fsc->fc);
 
-    return ftdispi_wait(fsc, BIT_P_CS, fsc->bitini, RETRY_MAX);
+    return FTDISPI_ERROR_NONE;
 }
-
 
 __dll int ftdispi_write(struct ftdispi_context * fsc,
                             const void *buf,
