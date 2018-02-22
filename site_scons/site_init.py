@@ -83,6 +83,7 @@ if not GetOption('clean'):
 
     if prefix:
         ccflags.append('-I' + os.path.join(prefix, 'include'))
+        ccflags.append('-I/usr/include/libftdi1')
         libpath.append(os.path.join(prefix, libdir))
 
     libpath.append(libdir)

@@ -18,7 +18,7 @@ env = Environment(PREFIX  = PREFIX,
 if not env.GetOption('clean'):
     conf = Configure(env)
     conferror = False
-    for l in ['usb', 'ftdi']:
+    for l in ['usb', 'ftdi1']:
         if not conf.CheckLib(l):
             conferror = True
     if conferror:
@@ -66,7 +66,7 @@ env.Clean('distclean', ['.sconsign.dblite',
 #                  PACKAGETYPE    = 'rpm',
 #                  LICENSE        = 'new BSD',
 #                  SUMMARY        = 'Library to program and control the FTDI USB controller as a SPI Master',
-#                  DESCRIPTION    = 'A library (using libftdi and so libusb) to use FTDI devices including FT4232H and FT2232H as a SPI master',
+#                  DESCRIPTION    = 'A library (using libftdi1 and so libusb) to use FTDI devices including FT4232H and FT2232H as a SPI master',
 #                  X_RPM_GROUP    = '',
 #                  SOURCE_URL     = 'http://code.google.com/p/libftdispi/',
 #                  source         = install)
