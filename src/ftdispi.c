@@ -251,6 +251,7 @@ __dll int ftdispi_write_read(struct ftdispi_context * fsc,
                                  uint8_t gpo)
 {
     int i, n, r;
+    struct ftdi_transfer_control *tc;
 
     ASSERT_CHECK(!fsc, "CTX NOT INITIALIZED", FTDISPI_ERROR_CTX);
     ASSERT_CHECK(!((wbuf && wcount) || (rbuf && rcount)),
@@ -258,6 +259,9 @@ __dll int ftdispi_write_read(struct ftdispi_context * fsc,
     n = wcount + (rcount ? 10 : 6);
     ASSERT_CHECK(ftdispi_realloc(fsc, n), "REALLOC", FTDISPI_ERROR_MEM);
 
+    if (rcount && rbuf) {
+        FTDI_CHECK(tc = ftdi_read_data_submit(&fsc->fc, rbuf, rcount), "Async subm", fsc->fc);
+    }
     i = 0;
     fsc->mem[i++] = SET_BITS_LOW;
     fsc->mem[i++] = ((0x0F & (fsc->bitini ^ BIT_P_CS)) |
@@ -285,11 +289,7 @@ __dll int ftdispi_write_read(struct ftdispi_context * fsc,
     FTDI_CHECK(ftdi_write_data(&fsc->fc, fsc->mem, i), "[WR]RD", fsc->fc);
     if (rcount && rbuf)
     {
-        for (n = 0; n < rcount; )
-        {
-            FTDI_CHECK(r = ftdi_read_data(&fsc->fc, rbuf + n, rcount - n), "RD", fsc->fc);
-            n += r;
-        }
+        FTDI_CHECK(r = ftdi_transfer_data_done(tc), "ASYN RD", fsc->fc);
     }
 
     return FTDISPI_ERROR_NONE;

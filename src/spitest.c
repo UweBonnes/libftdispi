@@ -63,10 +63,9 @@ int main(int argc, char **argv)
     }
     ftdispi_open(&fsc, &fc, INTERFACE_ANY);
     ftdispi_setmode(&fsc, 1, 0, 0, 0, 0, FTDISPI_GPO0);
-    ftdispi_setclock(&fsc, 1000000);
+    ftdispi_setclock(&fsc, 2000000);
     puts("Hit ^C to abort");
     signal(SIGINT, sigintHandler);
-//    ftdispi_setloopback(&fsc, 0);
     do {
         ftdispi_write_read(&fsc, "Test", 4, buf, 1, 0);
     }while  (!exitRequested);
